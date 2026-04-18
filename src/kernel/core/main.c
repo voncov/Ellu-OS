@@ -19,14 +19,18 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 */
+#include <limine.h>
 #include <stdint.h>
 #include <stddef.h>
-#include <limine.h>
 
-static volatile struct limine_framebuffer_request fb_request = {
+__attribute__((used, section(".limine_requests")))
+volatile struct limine_framebuffer_request fb_request = {
     .id = LIMINE_FRAMEBUFFER_REQUEST,
-    .revision = 0
+    .revision = 1
 };
+
+void kprint(const char *str, uint32_t color);
+void draw_image_centered();
 
 void kmain(void) {
     if (fb_request.response == NULL || fb_request.response->framebuffer_count < 1) {
@@ -37,8 +41,11 @@ void kmain(void) {
 
     uint32_t *dest = (uint32_t *)fb->address;
     for (size_t i = 0; i < fb->width * fb->height; i++) {
-        dest[i] = 0x0000FF;
+        dest[i] = 0x000000; 
     }
+    draw_image_centered();
 
+    kprint("{FFFFFF}ElluKernel v.0.1.0.1-alpha (Build 15) - Ellu-OS Copyright (c) 2026 voncov\n", 0xFFFFFF);
+    kprint("{FFFFFF}  Official repo: {3467EB}https://github.com/voncov/Ellu-OS{FFFFFF}\n", 0xFFFFFF);
     for (;;);
 }
