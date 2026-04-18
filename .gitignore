@@ -1,0 +1,8 @@
+build/
+*.o
+*.elf
+*.iso
+iso_root/
+compile_commands.json
+.cache/
+limine/limine
