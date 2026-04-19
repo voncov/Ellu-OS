@@ -19,33 +19,43 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 */
+#include <logo.h>
+#include <uuid4.h>
 #include <limine.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <driver.h>
+#include <tty/tty.h>
+#include <video/lfb.h>
 
 __attribute__((used, section(".limine_requests")))
-volatile struct limine_framebuffer_request fb_request = {
+struct limine_framebuffer_request fb_request = {
     .id = LIMINE_FRAMEBUFFER_REQUEST,
     .revision = 1
 };
 
-void kprint(const char *str, uint32_t color);
-void draw_image_centered();
-
-void kmain(void) {
-    if (fb_request.response == NULL || fb_request.response->framebuffer_count < 1) {
-        for (;;);
+VOID krnl_Main(VOID)
+{    
+    E_LFBDRV *lfb = lfb_CreateDrvE(&fb_request);
+    {
+        UINT32 x = (lfb->width - logo_width) / 2;
+        UINT32 y = (lfb->height - logo_height) / 2;
+        for (UINT32 ly = 0; ly < logo_height; ly++) {
+            for (UINT32 lx = 0; lx < logo_width; lx++) {
+                UINT32 color = logo_data[ly * logo_width + lx];
+                if (color != 0x00000000) {
+                    UINT32 screen_x = x + lx;
+                    UINT32 screen_y = y + ly;
+                    lfb->address[screen_y * (lfb->pitch / 4) + screen_x] = color;
+                }
+            }
+        }
     }
-
-    struct limine_framebuffer *fb = fb_request.response->framebuffers[0];
-
-    uint32_t *dest = (uint32_t *)fb->address;
-    for (size_t i = 0; i < fb->width * fb->height; i++) {
-        dest[i] = 0x000000; 
+    tty_SetupE();
+    E_TTYDRV *tty = (E_TTYDRV *)drv_UuidFindE(uuid4_NewStr("607a2963-82ad-4c39-a6b1-58f6f30ec33b"));
+    if (tty) {
+        tty_WriteE(tty, "{#FFFFFF}ElluKernel v.0.1.1-alpha (Build 21) - Ellu-OS Copyright (c) 2026 voncov\n");
+        tty_WriteE(tty, "{#FFFFFF}  Official repo: {#3467EB}https://github.com/voncov/Ellu-OS{#FFFFFF}\n");
     }
-    draw_image_centered();
-
-    kprint("{FFFFFF}ElluKernel v.0.1.0.1-alpha (Build 15) - Ellu-OS Copyright (c) 2026 voncov\n", 0xFFFFFF);
-    kprint("{FFFFFF}  Official repo: {3467EB}https://github.com/voncov/Ellu-OS{FFFFFF}\n", 0xFFFFFF);
     for (;;);
 }
