@@ -35,10 +35,10 @@ source ~/.bashrc
 ```
 
 
-## Check i686-elf-gcc
+## Check x86_64-elf-gcc
 
 ```bash
-i686-elf-gcc -v
+x86_64-elf-gcc -v
 ```
 * *If you encounter an error, check that you have installed the compiler correctly by following the steps shown here.*
 
