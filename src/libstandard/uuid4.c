@@ -55,9 +55,8 @@ UUID4 uuid4_NewFrom(UINT64 low, UINT64 high)
     return u;
 }
 
-UUID4 uuid4_NewStr(const CHAR *str)
+VOID uuid4_NewStr(const CHAR *str, UUID4 *out)
 {
-    UUID4 result = {0, 0};
     UINT8 bytes[16];
     INT32 byte_idx = 0;
 
@@ -69,11 +68,13 @@ UUID4 uuid4_NewStr(const CHAR *str)
         bytes[byte_idx++] = hexToByte(&str[i]);
         i += 2;
     }
+
+    out->high = 0;
+    out->low = 0;
     for (INT32 i = 0; i < 8; i++) {
-        result.high = (result.high << 8) | bytes[i];
-        result.low  = (result.low << 8) | bytes[i + 8];
+        out->high = (out->high << 8) | bytes[i];
+        out->low  = (out->low << 8) | bytes[i + 8];
     }
-    return result;
 }
 
 VOID uuid4_ToStr(UUID4 uuid, CHAR *out)

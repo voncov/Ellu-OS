@@ -19,36 +19,17 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 */
-#ifndef DRIVER_H
-#define DRIVER_H
+#ifndef MALLOC_H
+#define MALLOC_H
 #pragma once
 
-#include <uuid4.h>
 #include <stdint.h>
 #include <stddef.h>
 
-typedef struct DRV_MEM_REGION {
-    UINTPTR base;
-    SIZE size;
-    UINT32 flags;
-    struct DRV_MEM_REGION* next;
-} E_DRV_MEM_REGION;
+#define HHDM_OFFSET 0xFFFF800000000000
 
-typedef struct DRV {
-    const CHAR* name;
-    UUID4 interface_id;
-    UUID4 instance_id;
-
-    INT32 (*init)(struct DRV* self);
-    INT32 (*destroy)(struct DRV* self);
-
-    E_DRV_MEM_REGION* mem_regions;
-
-    void* private_data; 
-} E_DRV;
-
-INT32 drv_RegE(E_DRV* drv);
-E_DRV* drv_UuidFindE(UUID4 id);
-E_DRV* drv_NameFindE(const CHAR* name);
+VOID kMallocInitE(SIZE initial_size);
+VOID *kMallocE(SIZE size);
+VOID kFreeE(VOID* ptr);
 
 #endif

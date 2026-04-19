@@ -20,8 +20,10 @@
     SOFTWARE.
 */
 #include "lfb.h"
-
-static E_LFBDRV global_lfb;
+#include "driver.h"
+#include "stdint.h"
+#include <malloc.h>
+#include <string.h>
 
 static INT32 lfb_InitE(E_DRV* self)
 {
@@ -40,12 +42,33 @@ static INT32 lfb_InitE(E_DRV* self)
 
 E_LFBDRV* lfb_CreateDrvE(struct limine_framebuffer_request* req)
 {
-    global_lfb.base.name = "LFB Video";
-    global_lfb.base.interface_id = uuid4_NewStr("be67439d-98cb-484b-8c71-fc5dbe809623");
-    global_lfb.base.instance_id = uuid4_NewStr("be67439d-98cb-484b-8c71-fc5dbe809623");
-    global_lfb.base.init = lfb_InitE;
-    global_lfb.base.private_data = req;
+    E_LFBDRV* lfb = (E_LFBDRV*)kMallocE(sizeof(E_LFBDRV));
+    if (!lfb || !req->response || req->response->framebuffer_count < 1) {
+        return NULL;
+    }
+    MemSet(lfb, 0, sizeof(E_LFBDRV));
+    UUID4 target_id;
+    uuid4_NewStr("be67439d-98cb-484b-8c71-fc5dbe809623", &target_id);
+    lfb->base.name = "LFB Video";
+    lfb->base.init = lfb_InitE;
+    lfb->base.private_data = req;
+    lfb->base.interface_id = target_id;
+    lfb->base.instance_id = target_id;
+    if (lfb_InitE((E_DRV*)lfb) != 0) {
+        kFreeE(lfb);
+        return NULL;
+    }
 
-    if (drv_RegE((E_DRV*)&global_lfb) == 0) return &global_lfb;
-    return NULL;
+    E_DRV_MEM_REGION* region = (E_DRV_MEM_REGION*)kMallocE(sizeof(E_DRV_MEM_REGION));
+    if (region) {
+        region->base = (UINTPTR)req->response->framebuffers[0]->address;
+        region->size = req->response->framebuffers[0]->height * req->response->framebuffers[0]->pitch;
+        region->flags = 0;
+        region->next = NULL;
+        lfb->base.mem_regions = region;
+    }
+
+    drv_RegE((E_DRV*)lfb);
+
+    return lfb;
 }

@@ -25,10 +25,14 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdarg.h>
 
 INT32 StrCmp(const CHAR *s1, const CHAR *s2);
 SIZE StrLen(const CHAR *s);
 VOID *MemSet(VOID *s, INT32 c, SIZE n);
 VOID *MemCpy(VOID *dest, const VOID *src, SIZE n);
+INT32 vsnPrintF(CHAR *str, SIZE size, const CHAR *format, VA_LIST ap);
+INT32 snPrintF(CHAR *str, SIZE size, const CHAR *format, ...);
+INT32 sPrintF(CHAR *str, const CHAR *format, ...);
 
 #endif

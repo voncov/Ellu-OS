@@ -22,11 +22,13 @@
 #include "tty.h"
 #include <font.h>
 #include <uuid4.h>
-
-static E_TTYDRV global_tty;
+#include <malloc.h>
+#include <stddef.h>
+#include <string.h>
 
 static VOID tty_DrawPixelE(E_TTYDRV* tty, UINT64 x, UINT64 y, UINT32 color)
 {
+    if (tty->vdev == NULL) return;
     if (x >= tty->vdev->width || y >= tty->vdev->height) {
         return;
     }
@@ -51,7 +53,9 @@ static INT32 hexToInt(CHAR c)
 static INT32 tty_InitE(E_DRV* self)
 {
     E_TTYDRV* tty = (E_TTYDRV*)self;
-    E_DRV* vdrv = drv_UuidFindE(uuid4_NewStr("be67439d-98cb-484b-8c71-fc5dbe809623"));
+    UUID4 target_id;
+    uuid4_NewStr("be67439d-98cb-484b-8c71-fc5dbe809623", &target_id);
+    E_DRV* vdrv = drv_UuidFindE(target_id);
     
     if (vdrv == NULL) {
         return -1;
@@ -64,16 +68,26 @@ static INT32 tty_InitE(E_DRV* self)
     return 0;
 }
 
-INT32 tty_SetupE()
+E_TTYDRV* tty_CreateDrvE()
 {
-    global_tty.base.name = "System TTY";
-    global_tty.base.interface_id = uuid4_NewStr("607a2963-82ad-4c39-a6b1-58f6f30ec33b");
-    global_tty.base.instance_id = uuid4_NewStr("607a2963-82ad-4c39-a6b1-58f6f30ec33b");
-    global_tty.base.init = tty_InitE;
-    global_tty.fg_color = 0xFFFFFF;
-    global_tty.bg_color = 0x000000;
+    UUID4 target_id;
+    uuid4_NewStr("607a2963-82ad-4c39-a6b1-58f6f30ec33b", &target_id);
+    E_TTYDRV* tty = (E_TTYDRV*)kMallocE(sizeof(E_TTYDRV));
+    if (!tty) {
+        return NULL;
+    }
+    MemSet(tty, 0, sizeof(E_TTYDRV));
+    tty->base.name = "System TTY";
+    tty->base.interface_id = target_id;
+    tty->base.instance_id = target_id;
+    tty->base.init = tty_InitE;
+    tty->fg_color = 0xFFFFFF;
+    tty->bg_color = 0x000000;
 
-    return drv_RegE((E_DRV*)&global_tty);
+    drv_RegE((E_DRV*)tty);
+    tty_InitE((E_DRV*)tty);
+
+    return tty;
 }
 
 VOID tty_PutCE(E_TTYDRV* tty, CHAR c)

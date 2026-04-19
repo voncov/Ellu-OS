@@ -33,7 +33,7 @@ typedef struct {
 
 INT32 uuid4_Equals(UUID4 a, UUID4 b);
 UUID4 uuid4_NewFrom(UINT64 low, UINT64 high);
-UUID4 uuid4_NewStr(const CHAR *str);
+VOID uuid4_NewStr(const CHAR *str, UUID4 *out);
 VOID uuid4_ToStr(UUID4 uuid, CHAR *out);
 
 #endif

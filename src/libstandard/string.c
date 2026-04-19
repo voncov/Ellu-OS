@@ -23,6 +23,35 @@
 #include <string.h>
 #include <stdarg.h>
 
+static CHAR* LongToStr(CHAR* str, UINT64 num, INT32 base)
+{
+    CHAR* ptr = str;
+    CHAR* ptr1 = str;
+    CHAR tmp_char;
+
+    if (num == 0) {
+        *ptr++ = '0';
+        *ptr = '\0';
+        return str;
+    }
+    
+    while (num > 0) {
+        UINT64 next_num = num / base;
+        UINT64 digit = num % base;
+        *ptr++ = "0123456789abcdef"[digit];
+        num = next_num;
+    }
+
+    *ptr-- = '\0';
+
+    while (ptr1 < ptr) {
+        tmp_char = *ptr;
+        *ptr-- = *ptr1;
+        *ptr1++ = tmp_char;
+    }
+    return str;
+}
+
 INT32 StrCmp(const CHAR *s1, const CHAR *s2)
 {
     while (*s1 && (*s1 == *s2)) {
@@ -56,47 +85,10 @@ VOID *MemCpy(VOID *dest, const VOID *src, SIZE n)
     return dest;
 }
 
-static CHAR* LongToStr(CHAR* str, INT64 num, INT32 base)
-{
-    CHAR* ptr = str;
-    CHAR* ptr1 = str;
-    CHAR tmp_char;
-    INT64 tmp_value;
-
-    if (num == 0) {
-        *ptr++ = '0';
-        *ptr = '\0';
-        return str;
-    }
-
-    int is_negative = 0;
-    if (num < 0 && base == 10) {
-        is_negative = 1;
-        num = -num;
-    }
-
-    while (num > 0) {
-        tmp_value = num;
-        num /= base;
-        *ptr++ = "0123456789abcdef"[tmp_value - num * base];
-    }
-
-    if (is_negative) *ptr++ = '-';
-    *ptr-- = '\0';
-
-    while (ptr1 < ptr) {
-        tmp_char = *ptr;
-        *ptr-- = *ptr1;
-        *ptr1++ = tmp_char;
-    }
-    return str;
-}
-
 INT32 vsnPrintF(CHAR *str, SIZE size, const CHAR *format, VA_LIST ap)
 {
     SIZE written = 0;
     const CHAR *f = format;
-    
     while (*f && written < size - 1) {
         if (*f == '%') {
             f++;
@@ -125,7 +117,6 @@ INT32 vsnPrintF(CHAR *str, SIZE size, const CHAR *format, VA_LIST ap)
         }
         f++;
     }
-
     str[written] = '\0';
     return (INT32)written;
 }

@@ -37,7 +37,7 @@ typedef struct {
     UINT64 cursor_y;
 } E_TTYDRV;
 
-INT32 tty_SetupE();
+E_TTYDRV* tty_CreateDrvE();
 VOID tty_PutCE(E_TTYDRV* tty, CHAR c);
 VOID tty_WriteE(E_TTYDRV* tty, const CHAR* str);
 

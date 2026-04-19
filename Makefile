@@ -8,12 +8,12 @@ ifeq ($(ARCH), x86_64)
     LDFLAGS_ARCH = -T src/kernel/arch/x86_64/linker.ld
 endif
 
-CFLAGS = -Wall -Wextra -std=c11 -Iinclude \
-         -Isrc/drivers -Isrc/hal \
+CFLAGS = -Wall -Wextra -std=c11 -Iinclude -g \
+         -Isrc/drivers -Isrc/hal -Isrc/libstandard \
          -nostdinc -nostdlib -ffreestanding -fno-stack-protector -fno-stack-check \
          -fno-lto -fno-PIE $(CFLAGS_ARCH)
 
-LDFLAGS = $(LDFLAGS_ARCH) -static -nostdlib -no-pie -z max-page-size=0x1000
+LDFLAGS = $(LDFLAGS_ARCH) -g -static -nostdlib -no-pie -z max-page-size=0x1000
 
 SRCDIR = src
 BUILDDIR = build

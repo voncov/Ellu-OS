@@ -19,11 +19,14 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 */
+#include <pmm.h>
 #include <logo.h>
 #include <uuid4.h>
 #include <limine.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
+#include <malloc.h>
 #include <driver.h>
 #include <tty/tty.h>
 #include <video/lfb.h>
@@ -34,8 +37,16 @@ struct limine_framebuffer_request fb_request = {
     .revision = 1
 };
 
+__attribute__((used, section(".limine_requests")))
+struct limine_memmap_request memmap_request = {
+    .id = LIMINE_MEMMAP_REQUEST,
+    .revision = 0
+};
+
 VOID krnl_Main(VOID)
-{    
+{
+    pmm_Init(&memmap_request);
+    kMallocInitE(512);
     E_LFBDRV *lfb = lfb_CreateDrvE(&fb_request);
     {
         UINT32 x = (lfb->width - logo_width) / 2;
@@ -51,11 +62,17 @@ VOID krnl_Main(VOID)
             }
         }
     }
-    tty_SetupE();
-    E_TTYDRV *tty = (E_TTYDRV *)drv_UuidFindE(uuid4_NewStr("607a2963-82ad-4c39-a6b1-58f6f30ec33b"));
+    E_TTYDRV *tty = tty_CreateDrvE();
     if (tty) {
-        tty_WriteE(tty, "{#FFFFFF}ElluKernel v.0.1.1-alpha (Build 21) - Ellu-OS Copyright (c) 2026 voncov\n");
+        tty->base.init((E_DRV*)tty);
+        tty_WriteE(tty, "{#FFFFFF}ElluKernel v.0.1.1-alpha (Build 33) - Ellu-OS Copyright (c) 2026 voncov\n");
         tty_WriteE(tty, "{#FFFFFF}  Official repo: {#3467EB}https://github.com/voncov/Ellu-OS{#FFFFFF}\n");
+        CHAR lfb_memmap[256];
+        snPrintF(lfb_memmap, sizeof(lfb_memmap), "{#34eb83}E_LFBDRV found:\n  {#8934eb}Ptr: {#FFFFFF}0x%p\n  {#8934eb}Addr: {#FFFFFF}0x%x\n", lfb, lfb->base.mem_regions->base);
+        tty_WriteE(tty, lfb_memmap);
+        CHAR tty_memmap[256];
+        snPrintF(tty_memmap, sizeof(tty_memmap), "{#34eb83}E_TTYDRV found:\n  {#8934eb}Ptr: {#FFFFFF}0x%p\n  {#8934eb}Addr: {#FFFFFF}0x%x\n", tty, 0);
+        tty_WriteE(tty, tty_memmap);
     }
     for (;;);
 }

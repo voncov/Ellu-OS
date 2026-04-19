@@ -51,7 +51,8 @@ E_DRV* drv_UuidFindE(UUID4 id)
     return NULL;
 }
 
-E_DRV* drv_NameFindE(const CHAR* name) {
+E_DRV* drv_NameFindE(const CHAR* name)
+{
     for (UINT32 i = 0; i < driver_count; i++) {
         if (StrCmp(driver_registry[i]->name, name) == 0) {
             return driver_registry[i];

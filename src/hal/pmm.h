@@ -19,36 +19,16 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 */
-#ifndef DRIVER_H
-#define DRIVER_H
+#ifndef PMM_H
+#define PMM_H
 #pragma once
 
-#include <uuid4.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <limine.h>
 
-typedef struct DRV_MEM_REGION {
-    UINTPTR base;
-    SIZE size;
-    UINT32 flags;
-    struct DRV_MEM_REGION* next;
-} E_DRV_MEM_REGION;
-
-typedef struct DRV {
-    const CHAR* name;
-    UUID4 interface_id;
-    UUID4 instance_id;
-
-    INT32 (*init)(struct DRV* self);
-    INT32 (*destroy)(struct DRV* self);
-
-    E_DRV_MEM_REGION* mem_regions;
-
-    void* private_data; 
-} E_DRV;
-
-INT32 drv_RegE(E_DRV* drv);
-E_DRV* drv_UuidFindE(UUID4 id);
-E_DRV* drv_NameFindE(const CHAR* name);
+VOID pmm_Init(struct limine_memmap_request* memmap_req);
+VOID* pmm_AllocPage();
+VOID pmm_FreePage(VOID* addr);
 
 #endif
