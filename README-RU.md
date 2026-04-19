@@ -23,8 +23,8 @@ mkdir -p ~/opt/cross && cd ~/opt/cross
 
 Скачайте и распакуйте инструменты
 ```bash
-wget https://github.com/lordmilko/i686-elf-tools/releases/download/15.2.0/i686-elf-tools-linux.zip
-unzip i686-elf-tools-linux.zip
+wget https://github.com/lordmilko/i686-elf-tools/releases/download/15.2.0/x86_64-elf-tools-linux.zip
+unzip x86_64-elf-tools-linux.zip
 ```
 
 Добавьте компилятор в переменную PATH
