@@ -19,6 +19,7 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 */
+#include "krnl.h"
 #include <pmm.h>
 #include <logo.h>
 #include <uuid4.h>
@@ -30,6 +31,7 @@
 #include <driver.h>
 #include <tty/tty.h>
 #include <video/lfb.h>
+#include <com.h>
 
 __attribute__((used, section(".limine_requests")))
 struct limine_framebuffer_request fb_request = {
@@ -45,27 +47,17 @@ struct limine_memmap_request memmap_request = {
 
 VOID krnl_Main(VOID)
 {
+    com_SerialInitE();
+    com_PrintE("ElluKernel boot up!\n");
     pmm_Init(&memmap_request);
+    struct limine_memmap_response* map = memmap_request.response;
     kMallocInitE(512);
     E_LFBDRV *lfb = lfb_CreateDrvE(&fb_request);
-    {
-        UINT32 x = (lfb->width - logo_width) / 2;
-        UINT32 y = (lfb->height - logo_height) / 2;
-        for (UINT32 ly = 0; ly < logo_height; ly++) {
-            for (UINT32 lx = 0; lx < logo_width; lx++) {
-                UINT32 color = logo_data[ly * logo_width + lx];
-                if (color != 0x00000000) {
-                    UINT32 screen_x = x + lx;
-                    UINT32 screen_y = y + ly;
-                    lfb->address[screen_y * (lfb->pitch / 4) + screen_x] = color;
-                }
-            }
-        }
-    }
+    krnl_DrawLogo(lfb);
     E_TTYDRV *tty = tty_CreateDrvE();
     if (tty) {
         tty->base.init((E_DRV*)tty);
-        tty_WriteE(tty, "{#FFFFFF}ElluKernel v.0.1.1-alpha (Build 33) - Ellu-OS Copyright (c) 2026 voncov\n");
+        tty_WriteE(tty, "{#FFFFFF}ElluKernel v.0.1.1-alpha (Build 51) - Ellu-OS Copyright (c) 2026 voncov\n");
         tty_WriteE(tty, "{#FFFFFF}  Official repo: {#3467EB}https://github.com/voncov/Ellu-OS{#FFFFFF}\n");
         CHAR lfb_memmap[256];
         snPrintF(lfb_memmap, sizeof(lfb_memmap), "{#34eb83}E_LFBDRV found:\n  {#8934eb}Ptr: {#FFFFFF}0x%p\n  {#8934eb}Addr: {#FFFFFF}0x%x\n", lfb, lfb->base.mem_regions->base);
@@ -74,5 +66,23 @@ VOID krnl_Main(VOID)
         snPrintF(tty_memmap, sizeof(tty_memmap), "{#34eb83}E_TTYDRV found:\n  {#8934eb}Ptr: {#FFFFFF}0x%p\n  {#8934eb}Addr: {#FFFFFF}0x%x\n", tty, 0);
         tty_WriteE(tty, tty_memmap);
     }
+    lfb_SwapBuffersE(lfb);
     for (;;);
+}
+
+VOID krnl_DrawLogo(E_LFBDRV *lfb)
+{
+    UINT32 x = (lfb->width - logo_width) / 2;
+    UINT32 y = (lfb->height - logo_height) / 2;
+
+    for (UINT32 ly = 0; ly < logo_height; ly++) {
+        for (UINT32 lx = 0; lx < logo_width; lx++) {
+            UINT32 color = logo_data[ly * logo_width + lx];
+            if (color != 0x00000000) {
+                UINT32 screen_x = x + lx;
+                UINT32 screen_y = y + ly;
+                lfb->back_buffer[screen_y * (lfb->pitch / 4) + screen_x] = color;
+            }
+        }
+    }
 }

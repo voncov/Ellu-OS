@@ -30,5 +30,6 @@
 VOID pmm_Init(struct limine_memmap_request* memmap_req);
 VOID* pmm_AllocPage();
 VOID pmm_FreePage(VOID* addr);
+VOID* pmm_AllocPages(SIZE count);
 
 #endif

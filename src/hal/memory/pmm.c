@@ -21,6 +21,7 @@
 */
 #include <pmm.h>
 #include <string.h>
+#include <com.h>
 
 static UINT8* bitmap;
 static SIZE last_page_index = 0;
@@ -35,9 +36,8 @@ VOID pmm_Init(struct limine_memmap_request* memmap_req)
     struct limine_memmap_response* map = memmap_req->response;
     UINT64 max_addr = 0;
     for (SIZE i = 0; i < map->entry_count; i++) {
-        struct limine_memmap_entry* entry = map->entries[i];
-        if (entry->type == LIMINE_MEMMAP_USABLE) {
-            max_addr = entry->base + entry->length;
+        if (map->entries[i]->type == LIMINE_MEMMAP_USABLE) {
+            max_addr = map->entries[i]->base + map->entries[i]->length;
         }
     }
     total_pages = max_addr / 4096;
@@ -45,7 +45,7 @@ VOID pmm_Init(struct limine_memmap_request* memmap_req)
     for (SIZE i = 0; i < map->entry_count; i++) {
         struct limine_memmap_entry* entry = map->entries[i];
         if (entry->type == LIMINE_MEMMAP_USABLE && entry->length >= bitmap_size) {
-            bitmap = (UINT8*)(entry->base + 0xFFFF800000000000);
+            bitmap = (UINT8*)(entry->base + 0xFFFF800000000000);            
             MemSet(bitmap, 0xFF, bitmap_size);
             entry->base += bitmap_size;
             entry->length -= bitmap_size;
@@ -79,4 +79,25 @@ VOID pmm_FreePage(VOID* addr)
     SIZE index = (UINT64)addr / 4096;
     CLR_BIT(index);
     if (index < last_page_index) last_page_index = index;
+}
+
+VOID* pmm_AllocPages(SIZE count)
+{
+    if (count == 0) return NULL;
+    SIZE start_search = 0x1000000 / 4096; 
+    for (SIZE i = start_search; i <= total_pages - count; i++) {
+        SIZE found = 0;
+        for (SIZE j = 0; j < count; j++) {
+            if (!GET_BIT(i + j)) found++;
+            else {
+                i += j;
+                break;
+            }
+        }
+        if (found == count) {
+            for (SIZE j = 0; j < count; j++) SET_BIT(i + j);
+            return (VOID*)(i * 4096);
+        }
+    }
+    return NULL;
 }

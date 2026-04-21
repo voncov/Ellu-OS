@@ -92,7 +92,15 @@ INT32 vsnPrintF(CHAR *str, SIZE size, const CHAR *format, VA_LIST ap)
     while (*f && written < size - 1) {
         if (*f == '%') {
             f++;
-            if (*f == 's') {
+            if (*f == 'z') {
+                f++;
+                if (*f == 'u') {
+                    CHAR buf[32];
+                    LongToStr(buf, va_Arg(ap, SIZE), 10);
+                    CHAR *p = buf;
+                    while (*p && written < size - 1) str[written++] = *p++;
+                }
+            } else if (*f == 's') {
                 const CHAR *s = va_Arg(ap, const CHAR*);
                 while (*s && written < size - 1) {
                     str[written++] = *s++;

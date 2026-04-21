@@ -20,41 +20,52 @@
     SOFTWARE.
 */
 #include "malloc.h"
+#include "com.h"
 #include <pmm.h>
+#include <string.h>
 
 typedef struct MHEADER {
     SIZE size;
     INT32 is_free;
+    INT32 _pad;
     struct MHEADER *next;
 } E_MHEADER;
 
-static E_MHEADER *heap_start = NULL;
+E_MHEADER *heap_start = NULL;
 
 VOID kMallocInitE(SIZE initial_pages)
 {
-    for (SIZE i = 0; i < initial_pages; i++) {
-        VOID* p = pmm_AllocPage();
-        if (i == 0) {
-            heap_start = (E_MHEADER*)((UINT64)p + HHDM_OFFSET);
-            heap_start->size = (initial_pages * 4096) - sizeof(E_MHEADER);
-            heap_start->is_free = 1;
-            heap_start->next = NULL;
-        }
+    VOID* p = pmm_AllocPages(initial_pages);
+    if (!p) {
+        return; 
     }
+
+    heap_start = (E_MHEADER*)((UINT64)p + HHDM_OFFSET);
+    heap_start->size = (initial_pages * 4096) - sizeof(E_MHEADER);
+    heap_start->is_free = 1;
+    heap_start->next = NULL;
+
+    CHAR buf[256];
+    snPrintF(buf, sizeof(buf), "Heap initialized at: %p, size: %zu\n", heap_start, heap_start->size);
+    com_PrintE(buf);
 }
 
 VOID *kMallocE(SIZE size)
 {
+    size = (size + 15) & ~15;    
     E_MHEADER *current = heap_start;
     while (current) {
         if (current->is_free && current->size >= size) {
-            if (current->size > size + sizeof(E_MHEADER) + 16) {
-                E_MHEADER *next_block = (E_MHEADER*)((UINT8*)current + sizeof(E_MHEADER) + size);
-                next_block->size = current->size - size - sizeof(E_MHEADER);
+            UINTPTR current_data_addr = (UINTPTR)current + sizeof(E_MHEADER);
+            UINTPTR next_header_addr = current_data_addr + size;
+            next_header_addr = (next_header_addr + 15) & ~15;
+            SIZE total_needed_with_header = next_header_addr - (UINTPTR)current;
+            if (current->size >= total_needed_with_header + sizeof(E_MHEADER) + 16) {
+                E_MHEADER *next_block = (E_MHEADER*)next_header_addr;
+                next_block->size = current->size - (next_header_addr - (UINTPTR)current);
                 next_block->is_free = 1;
                 next_block->next = current->next;
-
-                current->size = size;
+                current->size = (next_header_addr - (UINTPTR)current) - sizeof(E_MHEADER);
                 current->next = next_block;
             }
             current->is_free = 0;

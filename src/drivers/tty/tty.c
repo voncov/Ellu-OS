@@ -29,11 +29,7 @@
 static VOID tty_DrawPixelE(E_TTYDRV* tty, UINT64 x, UINT64 y, UINT32 color)
 {
     if (tty->vdev == NULL) return;
-    if (x >= tty->vdev->width || y >= tty->vdev->height) {
-        return;
-    }
-    UINT32* fb_ptr = tty->vdev->address;
-    fb_ptr[y * (tty->vdev->pitch / 4) + x] = color;
+    lfb_DrawPointE(tty->vdev, x, y, color);
 }
 
 static INT32 hexToInt(CHAR c)

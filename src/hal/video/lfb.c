@@ -28,6 +28,7 @@
 static INT32 lfb_InitE(E_DRV* self)
 {
     E_LFBDRV* lfb = (E_LFBDRV*)self;
+    if (lfb->back_buffer != NULL) return 0;
     struct limine_framebuffer_request* req = self->private_data;
 
     if (!req->response || req->response->framebuffer_count < 1) return -1;
@@ -37,6 +38,14 @@ static INT32 lfb_InitE(E_DRV* self)
     lfb->width = fb->width;
     lfb->height = fb->height;
     lfb->pitch = fb->pitch;
+
+    SIZE buffer_size = (fb->pitch * fb->height) + 4096;
+    lfb->back_buffer = (UINT32*)kMallocE(buffer_size);
+    if (!lfb->back_buffer) {
+        return -1;
+    }
+    MemSet(lfb->back_buffer, 0, buffer_size);
+    lfb->back_buffer[0] = 0xDEADBEEF;
     return 0;
 }
 
@@ -54,10 +63,6 @@ E_LFBDRV* lfb_CreateDrvE(struct limine_framebuffer_request* req)
     lfb->base.private_data = req;
     lfb->base.interface_id = target_id;
     lfb->base.instance_id = target_id;
-    if (lfb_InitE((E_DRV*)lfb) != 0) {
-        kFreeE(lfb);
-        return NULL;
-    }
 
     E_DRV_MEM_REGION* region = (E_DRV_MEM_REGION*)kMallocE(sizeof(E_DRV_MEM_REGION));
     if (region) {
@@ -71,4 +76,18 @@ E_LFBDRV* lfb_CreateDrvE(struct limine_framebuffer_request* req)
     drv_RegE((E_DRV*)lfb);
 
     return lfb;
+}
+
+VOID lfb_SwapBuffersE(E_LFBDRV *lfb)
+{
+    if (!lfb || !lfb->back_buffer) return;
+    MemCpy(lfb->address, lfb->back_buffer, lfb->pitch * lfb->height);
+}
+
+VOID lfb_DrawPointE(E_LFBDRV *lfb, UINT64 x, UINT64 y, UINT32 color)
+{
+    if (x >= lfb->width || y >= lfb->height) {
+        return;
+    }
+    lfb->back_buffer[y * (lfb->pitch / 4) + x] = color;
 }
