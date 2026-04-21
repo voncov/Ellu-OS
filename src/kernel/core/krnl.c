@@ -32,6 +32,7 @@
 #include <tty/tty.h>
 #include <video/lfb.h>
 #include <com.h>
+#include <gdt.h>
 
 __attribute__((used, section(".limine_requests")))
 struct limine_framebuffer_request fb_request = {
@@ -47,6 +48,7 @@ struct limine_memmap_request memmap_request = {
 
 VOID krnl_Main(VOID)
 {
+    gdt_Init();
     com_SerialInitE();
     com_PrintE("ElluKernel boot up!\n");
     pmm_Init(&memmap_request);

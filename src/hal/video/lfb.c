@@ -45,7 +45,6 @@ static INT32 lfb_InitE(E_DRV* self)
         return -1;
     }
     MemSet(lfb->back_buffer, 0, buffer_size);
-    lfb->back_buffer[0] = 0xDEADBEEF;
     return 0;
 }
 

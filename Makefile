@@ -1,6 +1,9 @@
 ARCH ?= x86_64
 TOOLCHAIN_PATH = /home/user/opt/cross/bin
 
+AS = nasm
+ASFLAGS = -f elf64 -g
+
 ifeq ($(ARCH), x86_64)
     CC = $(TOOLCHAIN_PATH)/x86_64-elf-gcc
     LD = $(TOOLCHAIN_PATH)/x86_64-elf-ld
@@ -19,8 +22,10 @@ SRCDIR = src
 BUILDDIR = build
 ISO_ROOT = $(BUILDDIR)/iso_root
 
-SRCS = $(shell find $(SRCDIR) -name "*.c")
-OBJS = $(patsubst $(SRCDIR)/%.c, $(BUILDDIR)/%.o, $(SRCS))
+SRCS_C = $(shell find $(SRCDIR) -name "*.c")
+SRCS_ASM = $(shell find $(SRCDIR) -name "*.asm")
+OBJS = $(patsubst $(SRCDIR)/%.c, $(BUILDDIR)/%.o, $(SRCS_C)) \
+	   $(patsubst $(SRCDIR)/%.asm, $(BUILDDIR)/%.asm.o, $(SRCS_ASM))
 
 KERNEL = $(BUILDDIR)/kernel.elf
 ISO = ellu-os.iso
@@ -30,6 +35,10 @@ all: $(ISO)
 $(BUILDDIR)/%.o: $(SRCDIR)/%.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILDDIR)/%.asm.o: $(SRCDIR)/%.asm
+	@mkdir -p $(dir $@)
+	$(AS) $(ASFLAGS) $< -o $@
 
 $(KERNEL): $(OBJS)
 	$(LD) $(LDFLAGS) $(OBJS) -o $(KERNEL)
