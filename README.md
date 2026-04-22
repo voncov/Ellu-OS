@@ -1,5 +1,4 @@
 # Ellu-OS
-[(🇷🇺) Ru README](https://github.com/voncov/Ellu-OS/blob/main/README-RU.md)
 
 Ellu-OS is an open-source operating system designed for learning, experimentation, and low-level system development.
 
