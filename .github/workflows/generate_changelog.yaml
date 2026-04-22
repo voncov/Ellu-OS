@@ -1,0 +1,54 @@
+# Название workflow, описывает его цель
+name: Generate Changelog  
+
+
+# Указывает событие, при котором будет запускаться workflow
+on:
+  # Событие push в репозиторий  
+  push:
+    # Указывает, что workflow будет запускаться только при пушах в ветку main  
+    branches:
+      - main  
+
+
+# Определяет задачи, которые будут выполнены в рамках workflow
+jobs:
+  # Имя задачи, можно назвать по-другому, например, "update-changelog"  
+  build:
+    # Запуск задачи на последней версии Ubuntu  
+    runs-on: ubuntu-latest  
+
+
+    # Шаги, которые необходимо выполнить в рамках задачи
+    steps:
+      # Использование действия checkout для клонирования репозитория  
+    - uses: actions/checkout@v4
+      # Выкачивание всей истории коммитов, необходимо для корректной работы многих инструментов генерации changelog
+      with:
+        fetch-depth: 0  
+   
+    # Название шага
+    - name: Download and Install git-cliff
+      # Команды, которые будут выполнены в рамках шага
+      run: |  
+        curl -L "https://github.com/orhun/git-cliff/releases/download/v2.2.1/git-cliff-2.2.1-x86_64-unknown-linux-gnu.tar.gz" -o git-cliff.tar.gz  # Скачивание git-cliff
+        tar -xzf git-cliff.tar.gz  # Распаковка скачанного архива
+        mv git-cliff-2.2.1/git-cliff /usr/local/bin/  # Перемещение исполняемого файла git-cliff в директорию /usr/local/bin
+    # Шаг для генерации файла CHANGELOG.md
+    - name: Generate a changelog
+      uses: orhun/git-cliff-action@v3
+      with:
+        config: cliff.toml
+        args: --verbose
+      env:
+        OUTPUT: CHANGELOG.md
+     
+    # Шаг для коммита изменений
+    - name: Commit Changelog
+      # Команды для выполнения  
+      run: |  
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
+        git add CHANGELOG.md
+        git commit -m "Обновление CHANGELOG.md"
+        git push https://github.com/${{ github.repository }}.git HEAD:main
