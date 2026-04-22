@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file.
 
 - *(string.c)* Fixed incorrect memory allocation
 - *(lfb)* Framebuffer fixes
+- *(krnl)* A kernel logic fix leading to a kernel error
 
 ### 🚜 Refactor
 
