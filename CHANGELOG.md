@@ -9,10 +9,18 @@ All notable changes to this project will be documented in this file.
 - Initial kernel structure and proper limine submodule
 - *(lfb)* Changes in the video driver
 - *(tty)* Changes in the teletype driver
+- *(idt & isr)* Adding processor interrupt handlers
+
+### 🐛 Bug Fixes
+
+- *(string.c)* Fixed incorrect memory allocation
+- *(lfb)* Framebuffer fixes
 
 ### 🚜 Refactor
 
 - *(krnl)* Changes in the kernel
+- *(Makefile)* Makefile has been reworked to support multi-architecture.
+- *(gdt)* GDT moved to support multi-architecture
 
 ### 🎨 Styling
 
