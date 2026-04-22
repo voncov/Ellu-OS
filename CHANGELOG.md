@@ -10,6 +10,10 @@ All notable changes to this project will be documented in this file.
 - *(lfb)* Changes in the video driver
 - *(tty)* Changes in the teletype driver
 
+### 🚜 Refactor
+
+- *(krnl)* Changes in the kernel
+
 ### Feat
 
 - Added background & text rendering
