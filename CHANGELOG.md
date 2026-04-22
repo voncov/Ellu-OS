@@ -14,6 +14,10 @@ All notable changes to this project will be documented in this file.
 
 - *(krnl)* Changes in the kernel
 
+### 🎨 Styling
+
+- *(gdt)* Added definition of GDT and license
+
 ### Feat
 
 - Added background & text rendering
