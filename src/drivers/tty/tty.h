@@ -40,5 +40,6 @@ typedef struct {
 E_TTYDRV* tty_CreateDrvE();
 VOID tty_PutCE(E_TTYDRV* tty, CHAR c);
 VOID tty_WriteE(E_TTYDRV* tty, const CHAR* str);
+VOID tty_SetBkgColorE(E_TTYDRV *tty, UINT32 color);
 
 #endif

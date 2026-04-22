@@ -20,6 +20,7 @@
     SOFTWARE.
 */
 #include "tty.h"
+#include "stdint.h"
 #include <font.h>
 #include <uuid4.h>
 #include <malloc.h>
@@ -132,4 +133,9 @@ VOID tty_WriteE(E_TTYDRV* tty, const CHAR* str)
         }
         tty_PutCE(tty, *str++);
     }
+}
+
+VOID tty_SetBkgColorE(E_TTYDRV *tty, UINT32 color)
+{
+    tty->bg_color = color;
 }
