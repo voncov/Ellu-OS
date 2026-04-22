@@ -2,13 +2,14 @@ ARCH ?= x86_64
 TOOLCHAIN_PATH = /home/user/opt/cross/bin
 
 AS = nasm
-ASFLAGS = -f elf64 -g
 
 ifeq ($(ARCH), x86_64)
     CC = $(TOOLCHAIN_PATH)/x86_64-elf-gcc
     LD = $(TOOLCHAIN_PATH)/x86_64-elf-ld
     CFLAGS_ARCH = -m64 -march=x86-64 -mno-red-zone -mcmodel=kernel
     LDFLAGS_ARCH = -T src/kernel/arch/x86_64/linker.ld
+	ASFLAGS = -f elf64 -g
+	SRCS_ASM = $(shell find src/kernel/arch/x86_64/asm/ -name "*.asm")
 endif
 
 CFLAGS = -Wall -Wextra -std=c11 -Iinclude -g \
@@ -23,7 +24,7 @@ BUILDDIR = build
 ISO_ROOT = $(BUILDDIR)/iso_root
 
 SRCS_C = $(shell find $(SRCDIR) -name "*.c")
-SRCS_ASM = $(shell find $(SRCDIR) -name "*.asm")
+
 OBJS = $(patsubst $(SRCDIR)/%.c, $(BUILDDIR)/%.o, $(SRCS_C)) \
 	   $(patsubst $(SRCDIR)/%.asm, $(BUILDDIR)/%.asm.o, $(SRCS_ASM))
 
