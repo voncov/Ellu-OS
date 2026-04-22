@@ -39,5 +39,6 @@ typedef struct {
 E_LFBDRV* lfb_CreateDrvE(struct limine_framebuffer_request *req);
 VOID lfb_SwapBuffersE(E_LFBDRV *lfb);
 VOID lfb_DrawPointE(E_LFBDRV *lfb, UINT64 x, UINT64 y, UINT32 color);
+VOID lfb_ClearScreenE(E_LFBDRV *lfb, UINT32 color);
 
 #endif

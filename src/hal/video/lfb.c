@@ -90,3 +90,10 @@ VOID lfb_DrawPointE(E_LFBDRV *lfb, UINT64 x, UINT64 y, UINT32 color)
     }
     lfb->back_buffer[y * (lfb->pitch / 4) + x] = color;
 }
+
+VOID lfb_ClearScreenE(E_LFBDRV *lfb, UINT32 color)
+{
+    for (SIZE i = 0; i < lfb->pitch * lfb->height; i++) {
+        lfb->back_buffer[i] = color;
+    }
+}
