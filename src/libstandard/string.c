@@ -19,7 +19,7 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 */
-#include "stdint.h"
+#include <stdint.h>
 #include <string.h>
 #include <stdarg.h>
 
@@ -89,42 +89,54 @@ INT32 vsnPrintF(CHAR *str, SIZE size, const CHAR *format, VA_LIST ap)
 {
     SIZE written = 0;
     const CHAR *f = format;
+
     while (*f && written < size - 1) {
         if (*f == '%') {
             f++;
-            if (*f == 'z') {
+            INT32 isll = 0;
+            INT32 isl = 0;
+            while (*f == 'l') {
+                if (isl) {
+                    isll = 1;
+                    isl = 0;
+                } else {
+                    isl = 1;
+                }
                 f++;
-                if (*f == 'u') {
-                    CHAR buf[32];
-                    LongToStr(buf, va_Arg(ap, SIZE), 10);
-                    CHAR *p = buf;
-                    while (*p && written < size - 1) str[written++] = *p++;
-                }
-            } else if (*f == 's') {
+            }
+            if (*f == 's') {
                 const CHAR *s = va_Arg(ap, const CHAR*);
-                while (*s && written < size - 1) {
-                    str[written++] = *s++;
+                if (!s) {
+                    s = "(null)";
                 }
-            } else if (*f == 'd') {
+                while (*s && written < size - 1) str[written++] = *s++;
+            } 
+            else if (*f == 'd' || *f == 'i') {
                 CHAR buf[32];
-                LongToStr(buf, va_Arg(ap, INT32), 10);
+                INT64 val = (isll || isl) ? va_Arg(ap, INT64) : (INT64)va_Arg(ap, INT32);
+                LongToStr(buf, val, 10);
                 CHAR *p = buf;
                 while (*p && written < size - 1) str[written++] = *p++;
-            } else if (*f == 'x' || *f == 'p') {
+            }
+            else if (*f == 'x' || *f == 'p') {
                 CHAR buf[32];
-                LongToStr(buf, va_Arg(ap, UINT64), 16);
+                UINT64 val = (isll || isl || *f == 'p') ? va_Arg(ap, UINT64) : (UINT64)va_Arg(ap, UINT32);
+                LongToStr(buf, val, 16);
                 CHAR *p = buf;
                 while (*p && written < size - 1) str[written++] = *p++;
-            } else if (*f == 'c') {
+            }
+            else if (*f == 'c') {
                 str[written++] = (CHAR)va_Arg(ap, INT32);
-            } else if (*f == '%') {
+            }
+            else if (*f == '%') {
                 str[written++] = '%';
             }
         } else {
             str[written++] = *f;
-        }
+        }        
         f++;
     }
+
     str[written] = '\0';
     return (INT32)written;
 }
