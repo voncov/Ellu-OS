@@ -52,20 +52,19 @@ VOID krnl_Main(VOID)
     com_SerialInitE();
     com_PrintE("ElluKernel boot up!\n");
     pmm_Init(&memmap_request);
-    struct limine_memmap_response* map = memmap_request.response;
     kMallocInitE(512);
     E_LFBDRV *lfb = lfb_CreateDrvE(&fb_request);
     krnl_DrawLogo(lfb);
     E_TTYDRV *tty = tty_CreateDrvE();
     if (tty) {
         tty->base.init((E_DRV*)tty);
-        tty_WriteE(tty, "{#FFFFFF}ElluKernel v.0.1.1-alpha (Build 51) - Ellu-OS Copyright (c) 2026 voncov\n");
+        tty_WriteE(tty, "{#FFFFFF}ElluKernel v.0.1.1-alpha {#CCCCCC}(Build 51){#FFFFFF} - Ellu-OS Copyright (c) 2026 voncov\n");
         tty_WriteE(tty, "{#FFFFFF}  Official repo: {#3467EB}https://github.com/voncov/Ellu-OS{#FFFFFF}\n");
         CHAR lfb_memmap[256];
-        snPrintF(lfb_memmap, sizeof(lfb_memmap), "{#34eb83}E_LFBDRV found:\n  {#8934eb}Ptr: {#FFFFFF}0x%p\n  {#8934eb}Addr: {#FFFFFF}0x%x\n", lfb, lfb->base.mem_regions->base);
+        snPrintF(lfb_memmap, sizeof(lfb_memmap), "{#34eb83}E_LFBDRV found:\n  {#21A4ab}Ptr: {#CCCCCC}0x%p\n  {#21A4ab}Addr: {#CCCCCC}0x%x\n", lfb, lfb->base.mem_regions->base);
         tty_WriteE(tty, lfb_memmap);
         CHAR tty_memmap[256];
-        snPrintF(tty_memmap, sizeof(tty_memmap), "{#34eb83}E_TTYDRV found:\n  {#8934eb}Ptr: {#FFFFFF}0x%p\n  {#8934eb}Addr: {#FFFFFF}0x%x\n", tty, 0);
+        snPrintF(tty_memmap, sizeof(tty_memmap), "{#34eb83}E_TTYDRV found:\n  {#21A4ab}Ptr: {#CCCCCC}0x%p\n  {#21A4ab}Addr: {#CCCCCC}0x%x\n", tty, 0);
         tty_WriteE(tty, tty_memmap);
     }
     lfb_SwapBuffersE(lfb);
