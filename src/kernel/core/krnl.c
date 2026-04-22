@@ -33,6 +33,8 @@
 #include <video/lfb.h>
 #include <com.h>
 #include <gdt.h>
+#include <idt.h>
+#include <isr.h>
 
 __attribute__((used, section(".limine_requests")))
 struct limine_framebuffer_request fb_request = {
@@ -49,6 +51,7 @@ struct limine_memmap_request memmap_request = {
 VOID krnl_Main(VOID)
 {
     gdt_Init();
+    idt_Init();
     com_SerialInitE();
     com_PrintE("ElluKernel boot up!\n");
     pmm_Init(&memmap_request);
@@ -67,7 +70,12 @@ VOID krnl_Main(VOID)
         snPrintF(tty_memmap, sizeof(tty_memmap), "{#34eb83}E_TTYDRV found:\n  {#21A4ab}Ptr: {#CCCCCC}0x%p\n  {#21A4ab}Addr: {#CCCCCC}0x%x\n", tty, 0);
         tty_WriteE(tty, tty_memmap);
     }
+    isr_Init(lfb, tty);
     lfb_SwapBuffersE(lfb);
+    volatile INT32 a = 5;
+    volatile INT32 b = 0;
+    volatile INT32 c = a / b;
+    (void)c;
     for (;;);
 }
 
