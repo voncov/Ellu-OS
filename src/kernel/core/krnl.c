@@ -72,10 +72,6 @@ VOID krnl_Main(VOID)
     }
     isr_Init(lfb, tty);
     lfb_SwapBuffersE(lfb);
-    volatile INT32 a = 5;
-    volatile INT32 b = 0;
-    volatile INT32 c = a / b;
-    (void)c;
     for (;;);
 }
 
