@@ -85,6 +85,7 @@ VOID lfb_SwapBuffersE(E_LFBDRV *lfb)
 
 VOID lfb_DrawPointE(E_LFBDRV *lfb, UINT64 x, UINT64 y, UINT32 color)
 {
+    if (!lfb || !lfb->back_buffer) return;
     if (x >= lfb->width || y >= lfb->height) {
         return;
     }
@@ -93,7 +94,10 @@ VOID lfb_DrawPointE(E_LFBDRV *lfb, UINT64 x, UINT64 y, UINT32 color)
 
 VOID lfb_ClearScreenE(E_LFBDRV *lfb, UINT32 color)
 {
-    for (SIZE i = 0; i < lfb->pitch * lfb->height; i++) {
+    if (!lfb || !lfb->back_buffer) return;
+    SIZE pixels_per_line = lfb->pitch / 4;
+    SIZE total_pixels = pixels_per_line * lfb->height;
+    for (SIZE i = 0; i < total_pixels; i++) {
         lfb->back_buffer[i] = color;
     }
 }
