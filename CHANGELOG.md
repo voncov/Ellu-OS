@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 
 - Initial kernel structure and proper limine submodule
 - *(lfb)* Changes in the video driver
+- *(tty)* Changes in the teletype driver
 
 ### Feat
 
