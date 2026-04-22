@@ -26,6 +26,7 @@ All notable changes to this project will be documented in this file.
 ### 🎨 Styling
 
 - *(gdt)* Added definition of GDT and license
+- *(license)* Added license to some sources where required
 
 ### Feat
 
