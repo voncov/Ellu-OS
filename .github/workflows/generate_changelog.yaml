@@ -22,7 +22,7 @@ jobs:
     # Шаги, которые необходимо выполнить в рамках задачи
     steps:
       # Использование действия checkout для клонирования репозитория  
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v2  
       # Выкачивание всей истории коммитов, необходимо для корректной работы многих инструментов генерации changelog
       with:
         fetch-depth: 0  
@@ -35,13 +35,9 @@ jobs:
         tar -xzf git-cliff.tar.gz  # Распаковка скачанного архива
         mv git-cliff-2.2.1/git-cliff /usr/local/bin/  # Перемещение исполняемого файла git-cliff в директорию /usr/local/bin
     # Шаг для генерации файла CHANGELOG.md
-    - name: Generate a changelog
-      uses: orhun/git-cliff-action@v3
-      with:
-        config: cliff.toml
-        args: --verbose
-      env:
-        OUTPUT: CHANGELOG.md
+    - name: Generate Changelog
+      # Запуск git-cliff с указанием конфигурационного файла и выходного файла
+      run: git-cliff --config cliff.toml --output CHANGELOG.md  
      
     # Шаг для коммита изменений
     - name: Commit Changelog
